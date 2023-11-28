@@ -7,10 +7,9 @@ class CartManager {
     this.path = path || './src/mock/Cart.json';
     this.initiator();
   }
-
   async initiator() {
-    await this.getCarts(-1, true);
-    this.getId();
+    this.getCarts(-1, true);
+    await this.getId();
   }
 // Método para crear un nuevo carrito
   async create() {
@@ -28,22 +27,35 @@ class CartManager {
   }
 
    // Método para obtener carritos (asincrónico)
-  async getCarts( id = -1, synchronize = false) {
+   async getCarts(id = -1, synchronize = false) {
     let getCarts;
-    const exists = fs.existsSync(this.path);
-    if (!exists) {
-      getCarts = [];
-    } else {
-      getCarts = await fs.promises.readFile(this.path, 'utf-8')
-      getCarts = JSON.parse(getCarts)
+  
+    try {
+      const exists = fs.existsSync(this.path);
+  
+      if (!exists) {
+        getCarts = [];
+      } else {
+        const fileContent = await fs.promises.readFile(this.path, 'utf-8');
+  
+        // Check if the file content is empty
+        if (fileContent.trim() === '') {
+          getCarts = [];
+        } else {
+          getCarts = JSON.parse(fileContent);
+        }
+      }
+  
+      // Synchronize the variable cart with the obtained carts
+      if (synchronize === true) this.cart = getCarts;
+      if (id === -1) return getCarts;
+  
+      const cart = getCarts.find((crt) => crt.id === id);
+      return cart ? cart : 'Carrito no encontrado';
+    } catch (error) {
+      console.error('Error parsing JSON:', error.message);
+      return 'Error parsing JSON';
     }
-
-    // Sincroniza la variable cart con los carritos obtenidos
-    if (synchronize === true) this.cart = getCarts
-    if(id === -1) return getCarts
-
-    const cart = getCarts.find((crt) => crt.id === id);
-    return cart ? cart : 'Carrito no encontrado';
   }
 
   // Método para agregar un producto a un carrito

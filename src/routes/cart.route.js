@@ -6,7 +6,7 @@ const carrito = new CartManager('./src/mock/Cart.json')
 
 router.get('/:cid', async (req,res)=>{
     const id = req.params.cid
-    const resp = await carrito.getCarts(id)
+    const resp = await carrito.getCarts(5)
     if (typeof (resp) === "string") {
         res.status(400).json({
           status: "fail",
